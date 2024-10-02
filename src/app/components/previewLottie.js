@@ -37,7 +37,7 @@ const MyLottiePlayer = () => {
   const { View } = useLottie(options, style)
 
   return (
-    <div className="flex flex-col items-center">
+    <div style={{background:'white'}} className="flex flex-col items-center">
       <div className="mb-4 w-full max-w-xs">
         <input
           type="file"

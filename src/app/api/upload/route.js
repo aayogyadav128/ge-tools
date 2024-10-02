@@ -1,4 +1,3 @@
-// src/app/api/upload/route.js
 import { NextResponse } from 'next/server';
 import JSZip from 'jszip';
 import sizeOf from 'image-size';
@@ -26,9 +25,19 @@ export const POST = async (req) => {
     // Load the zip with JSZip
     const zip = await JSZip.loadAsync(buffer);
 
-    // Filter image files (only PNG and JPEG)
+    // Define supported extensions and MIME types
+    const supportedExtensions = ['.png', '.jpg', '.jpeg', '.webp'];
+    const mimeTypes = {
+      '.png': 'image/png',
+      '.jpg': 'image/jpeg',
+      '.jpeg': 'image/jpeg',
+      '.webp': 'image/webp',
+    };
+
+    // Filter image files based on supported extensions
     const imageFiles = Object.keys(zip.files).filter((fileName) => {
-      return fileName.endsWith('.png') || fileName.endsWith('.jpg') || fileName.endsWith('.jpeg');
+      const ext = path.extname(fileName).toLowerCase();
+      return supportedExtensions.includes(ext);
     });
 
     // Sort the images (assuming they are named in order)
@@ -55,11 +64,16 @@ export const POST = async (req) => {
         const dimensions = sizeOf(imgPath);
         const base64Data = imageData.toString('base64');
 
+        // Get the file extension and MIME type
+        const ext = path.extname(imageFile).toLowerCase();
+        const mimeType = mimeTypes[ext] || 'application/octet-stream';
+
         images.push({
           filename: imageFile,
           data: base64Data,
           width: dimensions.width,
           height: dimensions.height,
+          mimeType: mimeType,
         });
       }
     }
@@ -99,7 +113,7 @@ function createLottieJSON(images, fps) {
       w: width,
       h: height,
       u: '',
-      p: `data:image/png;base64,${image.data}`,
+      p: `data:${image.mimeType};base64,${image.data}`,
       e: 1,
     });
 

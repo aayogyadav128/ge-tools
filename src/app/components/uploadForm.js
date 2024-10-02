@@ -33,7 +33,7 @@ export default function ZipToLottie() {
   };
 
   return (
-    <div>
+    <div style={{background:'white'}}>
       <h1>Lottie Animation Creator</h1>
       <form onSubmit={handleSubmit}>
         <div>

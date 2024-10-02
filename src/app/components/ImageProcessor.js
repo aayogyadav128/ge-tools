@@ -8,7 +8,7 @@ import { saveAs } from 'file-saver';
 
 export default function ImageProcessor() {
   const [images, setImages] = useState([]);
-  const imgElement = useRef(null); // Use useRef instead of useState
+  const imgElement = useRef(null);
   const [currentImgUrl, setCurrentImgUrl] = useState(null);
   const [filters, setFilters] = useState({
     exposure: 0,
@@ -100,14 +100,14 @@ export default function ImageProcessor() {
       let b = data[i + 2];
 
       // Apply Exposure
-      r = r + (255 * exposure);
-      g = g + (255 * exposure);
-      b = b + (255 * exposure);
+      r = r + 255 * exposure;
+      g = g + 255 * exposure;
+      b = b + 255 * exposure;
 
       // Apply Contrast
-      r = ((r - 128) * contrast) + 128;
-      g = ((g - 128) * contrast) + 128;
-      b = ((b - 128) * contrast) + 128;
+      r = (r - 128) * contrast + 128;
+      g = (g - 128) * contrast + 128;
+      b = (b - 128) * contrast + 128;
 
       // Apply Saturation
       let avg = (r + g + b) / 3;
@@ -195,54 +195,82 @@ export default function ImageProcessor() {
   };
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Batch Image Processor</h1>
+    <div className="flex justify-center items-center" style={{background:'white',border: '1px solid black',borderRadius:5,padding:10, margin:10}}>
+      <div className="bg-white/10 backdrop-blur-md border-2 border-white rounded-lg p-8 m-4 max-w-4xl w-full">
+        <h1 className="text-3xl font-bold mb-6 text-center text-white">Batch Image Processor</h1>
 
-      <input
-        type="file"
-        accept=".zip"
-        onChange={handleZipUpload}
-        className="mb-4"
-      />
-      <div>
-        <button
-          onClick={() => loadImage(images[0].url)}
-          disabled={!zipUploaded}
-          className={`px-4 py-2 mr-2 mb-4 text-white ${zipUploaded ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-400 cursor-not-allowed'}`}
-        >
-          Load First Image
-        </button>
-        <button
-          onClick={processAllImages}
-          disabled={!zipUploaded || processing}
-          className={`px-4 py-2 text-white ${zipUploaded && !processing ? 'bg-green-500 hover:bg-green-600' : 'bg-gray-400 cursor-not-allowed'}`}
-        >
-          {processing ? 'Processing...' : 'Apply to All Images and Download'}
-        </button>
-      </div>
-
-      <div className="mb-4">
-        <canvas ref={canvasRef} className="border border-gray-300 w-2/5"></canvas>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {Object.keys(filters).map((filter) => (
-          <div key={filter}>
-            <label className="block font-medium text-gray-700">
-              {filter.charAt(0).toUpperCase() + filter.slice(1)}:
-            </label>
-            <input
-              type="range"
-              name={filter}
-              min={filter === 'contrast' || filter === 'saturation' ? 0 : filter === 'temperature' || filter === 'tint' ? -100 : -1}
-              max={filter === 'contrast' || filter === 'saturation' ? 3 : filter === 'temperature' || filter === 'tint' ? 100 : 1}
-              step={filter === 'temperature' || filter === 'tint' ? 1 : 0.01}
-              value={filters[filter]}
-              onChange={handleFilterChange}
-              className="w-full"
-            />
+        <div className="flex flex-col items-center">
+          <input
+            type="file"
+            accept=".zip"
+            onChange={handleZipUpload}
+            className="mb-4 text-white"
+          />
+          <div className="flex flex-wrap justify-center mb-6">
+            <button
+              onClick={() => loadImage(images[0]?.url)}
+              disabled={!zipUploaded}
+              className={`px-4 py-2 mr-2 mb-4 text-white ${
+                zipUploaded
+                  ? 'bg-blue-500 hover:bg-blue-600'
+                  : 'bg-gray-500 cursor-not-allowed'
+              } rounded`}
+            >
+              Load First Image
+            </button><br />
+            <button
+              onClick={processAllImages}
+              disabled={!zipUploaded || processing}
+              className={`px-4 py-2 text-white ${
+                zipUploaded && !processing
+                  ? 'bg-green-500 hover:bg-green-600'
+                  : 'bg-gray-500 cursor-not-allowed'
+              } rounded`}
+            >
+              {processing ? 'Processing...' : 'Apply to All Images and Download'}
+            </button>
           </div>
-        ))}
+
+          <div className="mb-6">
+            <canvas
+              ref={canvasRef}
+              className="border border-gray-300"
+              style={{ maxHeight: '500px' }}
+            ></canvas>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+            {Object.keys(filters).map((filter) => (
+              <div key={filter} className="flex flex-col items-center">
+                <label className="block font-medium text-white mb-2">
+                  {filter.charAt(0).toUpperCase() + filter.slice(1)}:
+                </label>
+                <input
+                  type="range"
+                  name={filter}
+                  min={
+                    filter === 'contrast' || filter === 'saturation'
+                      ? 0
+                      : filter === 'temperature' || filter === 'tint'
+                      ? -100
+                      : -1
+                  }
+                  max={
+                    filter === 'contrast' || filter === 'saturation'
+                      ? 3
+                      : filter === 'temperature' || filter === 'tint'
+                      ? 100
+                      : 1
+                  }
+                  step={filter === 'temperature' || filter === 'tint' ? 1 : 0.01}
+                  value={filters[filter]}
+                  onChange={handleFilterChange}
+                  className="w-full"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
